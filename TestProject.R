@@ -7,6 +7,7 @@ library(Quandl)
 Quandl.api_key("QTwA_u6oyP3DyrNzeVDS")
 library(dplyr)
 library(mice)
+library(purrr)
 ####################################
 
 ## set working directory to proper location 
@@ -28,15 +29,20 @@ df <- merge(x = daily_oil,y = oil_predictors, by = "Trade_Date", all.y = TRUE, a
 df <- df[complete.cases(df[5:8]),] #pattern noticed in the 5-8 columns for missing values..
 temp <- mice(df[,2:8], method="norm") #perform multiple imputation on the rest using bayesian linear imputation
 df <- cbind(df$Trade_Date,temp$data)  #rejoin
-names(df) <- c("Date", "Price", "global", "gold_silver", "fCon1", "fCon2", "fCon3", "fCon4")
+names(df) <- c("Date", "Price", "global", "gold_silver", "fCon1", "fCon2", "fCon3", "fCon4") #rename columns
 
-# some functions to handle the data wrangling
+## rescale all variables except the date 
+is.date <- function(x) inherits(x, 'Date')
 
-lag_matrix <- function(df, k){
-  #handle missing values
-  #clean
-  #create lags
-}
+df %>% map(function(s){
+  if(is.date(s)){
+    return(s)
+  }
+  else{
+    return(scale(s,center=TRUE,scale=TRUE))
+  }
+}) %>% 
+  as.data.frame() -> df
 
 
 
