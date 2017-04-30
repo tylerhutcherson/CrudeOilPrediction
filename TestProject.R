@@ -33,7 +33,6 @@ names(df) <- c("Date", "Price", "global", "gold_silver", "fCon1", "fCon2", "fCon
 
 ## rescale all variables except the date column
 is.date <- function(x) inherits(x, 'Date')
-
 df %>% map(function(s){
   if(is.date(s)){
     return(s)
@@ -44,19 +43,21 @@ df %>% map(function(s){
 }) %>% 
   as.data.frame() -> df
 
-## functions to create lags
-lags <- function(x) x[-1]
-lag_it_up <- function(d,k){
-  for(i in 2:nrow(d)){
-    
-  }
-}
+## create lagged variables
+df <- mutate_all(df,funs(lag1 = lag(.,1))) %>% 
+  mutate_all(funs(lag2 = lag(.,2))) %>% 
+  mutate_all(funs(lag3 = lag(.,3))) %>% 
+  select(-c(9,17,25:33,41,49,57)) %>% 
+  arrange(desc(Date))
 
-addcol <- function(dat){
-  dat1 = mutate(dat, x2=x1*2)
-  return(dat1)
-}
+names(df)[30:50] <- c("Price_lag4", "global_lag4", "gold_silver_lag4", "fCon1_lag4","fCon2_lag4","fCon3_lag4","fCon4_lag4",
+                      "Price_lag5", "global_lag5", "gold_silver_lag5", "fCon1_lag5","fCon2_lag5","fCon3_lag5","fCon4_lag5",
+                      "Price_lag6", "global_lag6", "gold_silver_lag6", "fCon1_lag6","fCon2_lag6","fCon3_lag6","fCon4_lag6")
 
+
+df <- df[complete.cases(df),]
+
+write.csv(df,"oil_cleaned.csv")
 
 
 
