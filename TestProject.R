@@ -31,7 +31,7 @@ temp <- mice(df[,2:8], method="norm") #perform multiple imputation on the rest u
 df <- cbind(df$Trade_Date,temp$data)  #rejoin
 names(df) <- c("Date", "Price", "global", "gold_silver", "fCon1", "fCon2", "fCon3", "fCon4") #rename columns
 
-## rescale all variables except the date 
+## rescale all variables except the date column
 is.date <- function(x) inherits(x, 'Date')
 
 df %>% map(function(s){
@@ -44,6 +44,18 @@ df %>% map(function(s){
 }) %>% 
   as.data.frame() -> df
 
+## functions to create lags
+lags <- function(x) x[-1]
+lag_it_up <- function(d,k){
+  for(i in 2:nrow(d)){
+    
+  }
+}
+
+addcol <- function(dat){
+  dat1 = mutate(dat, x2=x1*2)
+  return(dat1)
+}
 
 
 
