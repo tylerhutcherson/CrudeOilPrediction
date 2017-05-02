@@ -55,7 +55,7 @@ createLags <- function(df,sizes){
 
 ## rescale all variables except the date column to [-1,1]
 norm <- function(col){
-  return((2*(col - min(col, na.omit=TRUE))/(max(col,na.omit=TRUE)-min(col,na.omit=TRUE)))-1)
+  return((2*(col - min(col))/(max(col)-min(col)))-1)
 }
 
 normalize <- function(df){
