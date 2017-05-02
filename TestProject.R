@@ -8,6 +8,8 @@ Quandl.api_key("QTwA_u6oyP3DyrNzeVDS")
 library(dplyr)
 library(mice)
 library(purrr)
+library(tseries)
+library(forecast)
 ####################################
 
 ## set working directory to proper location 
@@ -20,16 +22,77 @@ daily_oil <- read.csv("Cushing_OK_WTI_Spot_Price_FOB_Daily.csv") %>%
 
 ## read in Global Index, Gold/Silver, Crude Oil futures contracts 1-4 from Quandl
 oil_predictors <- Quandl(c("NASDAQOMX/NQGI","NASDAQOMX/XAU","EIA/PET_RCLC1_D","EIA/PET_RCLC2_D","EIA/PET_RCLC3_D","EIA/PET_RCLC4_D")) %>% 
-  select(-c(3:6,8:11)) %>% 
-  subset(`Trade Date`>"2004-12-31")
+  select(-c(3:6,8:11)) 
 names(oil_predictors)[1] <- "Trade_Date"
 
 ## merge data together
-df <- merge(x = daily_oil,y = oil_predictors, by = "Trade_Date", all.y = TRUE, all.x = FALSE) 
+df <- merge(x = daily_oil,y = oil_predictors, by = "Trade_Date", all.y = FALSE, all.x = FALSE) 
 df <- df[complete.cases(df[5:8]),] #pattern noticed in the 5-8 columns for missing values..
-temp <- mice(df[,2:8], method="norm") #perform multiple imputation on the rest using bayesian linear imputation
-df <- cbind(df$Trade_Date,temp$data)  #rejoin
-names(df) <- c("Date", "Price", "global", "gold_silver", "fCon1", "fCon2", "fCon3", "fCon4") #rename columns
+df <- df[df$Trade_Date > "2015-05-01",] #grab last two years of data
+names(df) <- c("Date","Price", "global", "gold_silver", "fCon1", "fCon2", "fCon3", "fCon4") #rename columns
+
+###########################################################
+## EXPLORATORY ANALYSIS ##
+plot.ts(df$Price, main="2015-Present Crude Oil Price in $$", ylab = "Price in $$")
+plot.ts(df$gold_silver, main="2015-Present Gold/Silver Price in $$", ylab = "Price in $$")
+plot.ts(df$global, main="2015-Present Global Index Price in $$", ylab = "Price in $$")
+plot.ts(df$fCon1, main="2015-Present Futures Contract 1 Price in $$", ylab = "Price in $$")
+plot.ts(df$fCon2, main="2015-Present Futures Contract 2 Price in $$", ylab = "Price in $$")
+plot.ts(df$fCon3, main="2015-Present Futures Contract 3 Price in $$", ylab = "Price in $$")
+plot.ts(df$fCon4, main="2015-Present Futures Contract 4 Price in $$", ylab = "Price in $$")
+
+# calculate the total error in the futures contracts
+sum(abs(df$Price-df$fCon1), na.rm = TRUE) #84.21
+sum(abs(df$Price-df$fCon2), na.rm = TRUE) #466.05
+sum(abs(df$Price-df$fCon3), na.rm = TRUE) #810.77
+sum(abs(df$Price-df$fCon4), na.rm = TRUE) #1108.96
+
+# perform 3-day moving average filter on all ts data
+df[,2:8] %>% map(function(s){
+  ma(s, order = 3, centre=FALSE)
+}) %>% 
+  as.data.frame() %>% 
+  cbind(df$Date,.) -> df
+
+df <- df[complete.cases(df),]
+
+# non-stationarity is problematic.. difference the data
+#adf.test(df$Price)
+#adf.test(df$global)
+#adf.test(df$gold_silver)
+#adf.test(df$fCon1)
+#adf.test(df$fCon2)
+#adf.test(df$fCon3)
+#adf.test(df$fCon4)
+
+sizes <- c(1:13)
+sizes %>%
+  map(function(size){
+    values <- lag(df$Price, n=size)
+    name <- paste0("PriceLag",size)
+    list(name, values)
+  }) %>%
+  reduce(cbind) %>%
+  cbind(df) %>%
+  glimpse
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 ## rescale all variables except the date column
 is.date <- function(x) inherits(x, 'Date')
