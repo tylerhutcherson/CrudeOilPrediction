@@ -102,6 +102,11 @@ df <- df[complete.cases(df),]
 
 
 
+function(col){
+  for(2 in 1:nrow(df)){
+    col[i] <- (col[i]-col[i-1])/col[i-1]
+  }
+}
 
 
 
