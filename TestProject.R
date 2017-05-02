@@ -47,15 +47,6 @@ sum(abs(df$Price-df$fCon2), na.rm = TRUE) #466.05
 sum(abs(df$Price-df$fCon3), na.rm = TRUE) #810.77
 sum(abs(df$Price-df$fCon4), na.rm = TRUE) #1108.96
 
-# perform 3-day moving average filter on all ts data
-df[,2:8] %>% map(function(s){
-  ma(s, order = 3, centre=FALSE)
-}) %>% 
-  as.data.frame() %>% 
-  cbind(df$Date,.) -> df
-
-df <- df[complete.cases(df),]
-
 # non-stationarity is problematic.. difference the data
 #adf.test(df$Price)
 #adf.test(df$global)
@@ -64,7 +55,27 @@ df <- df[complete.cases(df),]
 #adf.test(df$fCon2)
 #adf.test(df$fCon3)
 #adf.test(df$fCon4)
+###########################################################
 
+# perform 3-day moving average filter on all ts data except the trade date
+is.date <- function(x) inherits(x, 'Date')
+header.true <- function(df) {
+  names(df) <- as.character(unlist(df[1,]))
+  df[-1,]
+}
+
+df %>% 
+  map(function(s){
+    if(is.date(s)){
+      return(s)
+    }
+    else{
+      return(ma(s, order = 3, centre=FALSE))
+    }
+  }) %>% 
+  as.data.frame() -> df
+
+# create lags in variables
 sizes <- c(1:13)
 sizes %>%
   map(function(size){
@@ -72,10 +83,22 @@ sizes %>%
     name <- paste0("PriceLag",size)
     list(name, values)
   }) %>%
-  reduce(cbind) %>%
-  cbind(df) %>%
-  glimpse
+  reduce(cbind) %>% 
+  as.data.frame() %>% 
+  header.true() %>% 
+  map(function(s){
+    unlist(s)
+  }) %>% 
+  as.data.frame() %>% 
+  cbind(df,.) %>% 
+  mutate(globalLag1 = lag(global, n=1), 
+         gold_silverLag1 = lag(gold_silver, n=1),
+         fCon1Lag1 = lag(fCon1, n=1), 
+         fCon2Lag1 = lag(fCon2, n=1), 
+         fCon3Lag1 = lag(fCon3, n=1), 
+         fCon4Lag1 = lag(fCon4, n=1)) -> df
 
+df <- df[complete.cases(df),]
 
 
 
@@ -95,7 +118,7 @@ sizes %>%
 
 
 ## rescale all variables except the date column
-is.date <- function(x) inherits(x, 'Date')
+
 df %>% map(function(s){
   if(is.date(s)){
     return(s)
@@ -106,21 +129,13 @@ df %>% map(function(s){
 }) %>% 
   as.data.frame() -> df
 
-## create lagged variables
-df <- mutate_all(df,funs(lag1 = lag(.,1))) %>% 
-  mutate_all(funs(lag2 = lag(.,2))) %>% 
-  mutate_all(funs(lag3 = lag(.,3))) %>% 
-  select(-c(9,17,25:33,41,49,57)) %>% 
-  arrange(desc(Date))
-
-names(df)[30:50] <- c("Price_lag4", "global_lag4", "gold_silver_lag4", "fCon1_lag4","fCon2_lag4","fCon3_lag4","fCon4_lag4",
-                      "Price_lag5", "global_lag5", "gold_silver_lag5", "fCon1_lag5","fCon2_lag5","fCon3_lag5","fCon4_lag5",
-                      "Price_lag6", "global_lag6", "gold_silver_lag6", "fCon1_lag6","fCon2_lag6","fCon3_lag6","fCon4_lag6")
 
 
-df <- df[complete.cases(df),]
 
 write.csv(df,"oil_cleaned.csv")
+
+
+
 
 
 
