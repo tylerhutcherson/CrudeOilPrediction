@@ -192,13 +192,15 @@ plot(range,tuneTreeSize, main="Tree Size and MSE")
 # Best Model = Single Layer Neural Network with 9 hidden units
 
 # plot network
-# build final model on full data except predication date: 4/27/17
+# build final model on full data except predication date: 4/24/17
 # use tuning parameters from the grid search results
 
-final.model <- nnet(f, data=exp2[1:(nrow(exp2)-1),], maxit = 10000, size = 9, decay = 0)
-prediction <- predict(caret.fit$finalModel,exp2[nrow(exp2),3:27])
-prediction <- (pr.nn+1)*(exp2Max-exp2Min)/2+exp2Min
-actual <- (exp2$Price[nrow(exp2)]+1)*(exp2Max-exp2Min)/2+exp2Min
+test.df <- normalize(df) # in order to get the correctly scaled value for the prediction date above (last row in df)
+
+final.model <- nnet(f, data=exp2, maxit = 10000, size = 9, decay = 0)
+prediction <- predict(caret.fit$finalModel,test.df[nrow(test.df),3:27])
+prediction <- (prediction+1)*(exp2Max-exp2Min)/2+exp2Min
+actual <- (test.df$Price[nrow(test.df)]+1)*(max(df$Price)-min(df$Price))/2+min(df$Price)
 difference <- abs(actual-prediction)
 percentDiff <- (difference/actual)*100
 
