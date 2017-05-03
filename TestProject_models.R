@@ -24,9 +24,10 @@ exp1 <- df %>%
           normalize()
 
 # Exp 2: normalized + 3 day moving average data
-exp2 <- df %>% 
+exp2 <- df[1:nrow(df)-1,] %>%  #don't perform moving average on last obs so that it doesn't get deleted.
           movingA(.,n = 3) %>% 
-          .[complete.cases(.),] 
+          .[complete.cases(.),] %>% 
+          rbind(df[nrow(df),])
 exp2Max <- max(exp2$Price)
 exp2Min <- min(exp2$Price)
 exp2 <- normalize(exp2)
@@ -197,10 +198,10 @@ plot(range,tuneTreeSize, main="Tree Size and MSE")
 
 test.df <- normalize(df) # in order to get the correctly scaled value for the prediction date above (last row in df)
 
-final.model <- nnet(f, data=exp2, maxit = 10000, size = 9, decay = 0)
-prediction <- predict(caret.fit$finalModel,test.df[nrow(test.df),3:27])
+final.model <- nnet(f, data=exp2[1:(nrow(exp2)-1),], maxit = 10000, size = 9, decay = 0)
+prediction <- predict(caret.fit$finalModel,exp2[nrow(exp2),3:27])
 prediction <- (prediction+1)*(exp2Max-exp2Min)/2+exp2Min
-actual <- (test.df$Price[nrow(test.df)]+1)*(max(df$Price)-min(df$Price))/2+min(df$Price)
+actual <- (exp2$Price[nrow(exp2)]+1)*(exp2Max-exp2Min)/2+exp2Min
 difference <- abs(actual-prediction)
 percentDiff <- (difference/actual)*100
 
