@@ -4,7 +4,7 @@
 ####################################
 install.packages("Quandl")
 library(Quandl)
-Quandl.api_key("QTwA_u6oyP3DyrNzeVDS")
+## INSTALL YOUR API KEY HERE
 library(dplyr)
 library(mice)
 library(purrr)
@@ -13,14 +13,14 @@ library(forecast)
 ####################################
 
 ## set working directory to proper location 
-setwd("~/Desktop/Data_Science/Side_Projects/Metis")
+setwd("")
 
 ## read in daily oil spot prices
 daily_oil <- read.csv("Cushing_OK_WTI_Spot_Price_FOB_Daily.csv") %>% 
   mutate(Trade_Date=as.Date(as.character(Trade.Date), "%m/%d/%y")) %>% 
   select(-c(1))
 
-## read in Global Index, Gold/Silver, Crude Oil futures contracts 1-4 from Quandl
+## read in Global Index, Gold/Silver Index, Crude Oil futures contracts 1-4 from Quandl
 oil_predictors <- Quandl(c("NASDAQOMX/NQGI","NASDAQOMX/XAU","EIA/PET_RCLC1_D","EIA/PET_RCLC2_D","EIA/PET_RCLC3_D","EIA/PET_RCLC4_D")) %>% 
   select(-c(3:6,8:11)) 
 names(oil_predictors)[1] <- "Trade_Date"
@@ -47,7 +47,7 @@ sum(abs(df$Price-df$fCon2), na.rm = TRUE) #1523.19
 sum(abs(df$Price-df$fCon3), na.rm = TRUE) #2665.97
 sum(abs(df$Price-df$fCon4), na.rm = TRUE) #3670.78
 
-# non-stationarity is problematic.. difference the data? perhaps.
+# non-stationarity is problematic.. difference the data? 
 #adf.test(df$Price)
 #adf.test(df$global)
 #adf.test(df$gold_silver)
