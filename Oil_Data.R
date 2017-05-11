@@ -1,4 +1,4 @@
-# Test Project ~ CLEANING
+# Crude Oil Prediction ~ Data Gathering and Merging
 # Tyler Hutcherson
 # tch6zf@virginia.edu
 ####################################
@@ -6,14 +6,10 @@ install.packages("Quandl")
 library(Quandl)
 ## INSTALL YOUR API KEY HERE
 library(dplyr)
-library(mice)
 library(purrr)
 library(tseries)
 library(forecast)
 ####################################
-
-## set working directory to proper location 
-setwd("")
 
 ## read in daily oil spot prices
 daily_oil <- read.csv("Cushing_OK_WTI_Spot_Price_FOB_Daily.csv") %>% 
