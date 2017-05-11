@@ -2,7 +2,7 @@
 # Tyler Hutcherson
 # tch6zf@virginia.edu
 ####################################
-setwd("~/Desktop/Data_Science/Side_Projects/Metis")
+setwd("") #set your wd here
 library(dplyr)
 library(caret)
 library(purrr)
@@ -14,10 +14,13 @@ set.seed(123456)
 source("TestProjectScripts.R")
 ####################################
 
+# read in cleaned oil dataand create lags
 df <- read_csv("oil_cleaned.csv", col_names = TRUE) %>% 
   select(-c(1)) %>% 
   createLags(c(1:13))
 df <- df[complete.cases(df),]
+
+## Three different sets of experimental data to test
 
 # Exp 1:  normalized data
 exp1 <- df %>% 
@@ -31,6 +34,7 @@ exp2 <- df[1:nrow(df)-1,] %>%  #don't perform moving average on last obs so that
 exp2Max <- max(exp2$Price)
 exp2Min <- min(exp2$Price)
 exp2 <- normalize(exp2)
+
 # Exp 3: normlized + 3 day moving average + log-differenced data
 exp3 <- df %>% 
           movingA(3) %>% 
