@@ -2,13 +2,13 @@
 # Tyler Hutcherson
 # tch6zf@virginia.edu
 ####################################
-install.packages("Quandl")
-library(Quandl)
+suppressWarnings(suppressMessages(install.packages("Quandl")))
+suppressWarnings(suppressMessages(library(Quandl)))
 ## INSTALL YOUR API KEY HERE
-library(dplyr)
-library(purrr)
-library(tseries)
-library(forecast)
+suppressWarnings(suppressMessages(library(dplyr)))
+suppressWarnings(suppressMessages(library(purrr)))
+suppressWarnings(suppressMessages(library(tseries)))
+suppressWarnings(suppressMessages(library(forecast)))
 ####################################
 
 ## read in daily oil spot prices - make sure .csv file is in the project directory
