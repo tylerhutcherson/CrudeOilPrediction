@@ -11,7 +11,7 @@ library(tseries)
 library(forecast)
 ####################################
 
-## read in daily oil spot prices
+## read in daily oil spot prices - make sure .csv file is in the project directory
 daily_oil <- read.csv("Cushing_OK_WTI_Spot_Price_FOB_Daily.csv") %>% 
   mutate(Trade_Date=as.Date(as.character(Trade.Date), "%m/%d/%y")) %>% 
   select(-c(1))
