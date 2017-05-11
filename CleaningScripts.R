@@ -1,4 +1,4 @@
-# Test Project ~ Scripts
+# Crude Oil Prediction ~ Cleaning + Time Series Scripts
 # Tyler Hutcherson
 # tch6zf@virginia.edu
 suppressWarnings(suppressMessages(library(dplyr)))
